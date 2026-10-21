@@ -31,6 +31,9 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+    
+class TicketUpdate(BaseModel):
+    status: str
 
 
 @app.get("/tickets")
@@ -55,7 +58,7 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: User
     return ticket
 
 @app.patch("/tickets/{ticket_id}")
-def close_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_ticket(ticket_id: int, update: TicketUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
@@ -63,7 +66,7 @@ def close_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: Us
     if current_user.role == "user" and ticket.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    ticket.status = "closed"
+    ticket.status = update.status
     db.commit()
     db.refresh(ticket)
     return ticket

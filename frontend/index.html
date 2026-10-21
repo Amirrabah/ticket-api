@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Ticket System</h1>
+
+    <div id="authSection">
+
+        <h2>Register</h2>
+        <input type="text" id="regName" placeholder="Name">
+        <input type="email" id="regEmail" placeholder="Email">
+        <input type="password" id="regPassword" placeholder="Password">
+        <button id="registerBtn">Register</button>
+        <p id="regMessage"></p>
+
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Log in</button>
+        <p id="message"></p>
+
+    </div>
+
+    <div id="appSection">
+
+        <button id="logoutBtn">Log out</button>
+
+        <h2>Tickets</h2>
+        <button id="loadBtn">Load tickets</button>
+        <div id="ticketList"></div>
+
+        <h2>New ticket</h2>
+        <input type="text" id="title" placeholder="Title">
+        <select id="priority">
+        <option value="low">Low</option>
+        <option value="normal">Normal</option>
+        <option value="high">High</option>
+    </select>
+        <button id="createBtn">Create</button>
+
+
+    </div>
+
+   
+
+    <script src="app.js"></script>
+    
+    
+</body>
+</html>
