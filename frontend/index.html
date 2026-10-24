@@ -2,54 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ticket System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Ticket System</h1>
+    <header>
+        <h1>Service Desk</h1>
+        <button id="logoutBtn" class="btn-secondary">Log out</button>
+    </header>
 
-    <div id="authSection">
+    <main>
 
-        <h2>Register</h2>
-        <input type="text" id="regName" placeholder="Name">
-        <input type="email" id="regEmail" placeholder="Email">
-        <input type="password" id="regPassword" placeholder="Password">
-        <button id="registerBtn">Register</button>
-        <p id="regMessage"></p>
+        <div id="authSection">
+            <p class="intro">Report IT problems and track them until they're solved. Log in, or create an account to try it.</p>
 
-        <h2>Login</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button id="loginBtn">Log in</button>
-        <p id="message"></p>
+            <div class="card">
+                <h2>Log in</h2>
+                <div class="form-row">
+                    <input type="email" id="email" placeholder="Email">
+                    <input type="password" id="password" placeholder="Password">
+                </div>
+                <button id="loginBtn">Log in</button>
+                <p id="message" class="message"></p>
+            </div>
 
-    </div>
+            <div class="card">
+                <h2>Create an account</h2>
+                <div class="form-row">
+                    <input type="text" id="regName" placeholder="Name">
+                    <input type="email" id="regEmail" placeholder="Email">
+                    <input type="password" id="regPassword" placeholder="Password">
+                </div>
+                <button id="registerBtn">Create account</button>
+                <p id="regMessage" class="message"></p>
+            </div>
 
-    <div id="appSection">
+        </div>
 
-        <button id="logoutBtn">Log out</button>
+        <div id="appSection">
 
-        <h2>Tickets</h2>
-        <button id="loadBtn">Load tickets</button>
-        <div id="ticketList"></div>
+            <div class="card">
+                <h2>Report a problem</h2>
+                <div class="form-row">
+                    <input type="text" id="title" placeholder="What's not working?">
+                    <select id="priority">
+                        <option value="low">Low</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High</option>
+                    </select>
+                    <button id="createBtn">Open ticket</button>
+                </div>
+            </div>
 
-        <h2>New ticket</h2>
-        <input type="text" id="title" placeholder="Title">
-        <select id="priority">
-        <option value="low">Low</option>
-        <option value="normal">Normal</option>
-        <option value="high">High</option>
-    </select>
-        <button id="createBtn">Create</button>
+            <div class="list-header">
+                <h2>Tickets</h2>
+                <button id="loadBtn" class="btn-secondary">Refresh</button>
+            </div>
 
+            <div id="ticketList"></div>
 
-    </div>
+        </div>
 
-   
+    </main>
 
     <script src="app.js"></script>
-    
-    
 </body>
 </html>
