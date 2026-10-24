@@ -4,11 +4,11 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-
 from db import get_db
 from models import Ticket, User
 from auth import hash_password, verify_password, create_access_token
 from dependencies import get_current_user
+
 
 
 app = FastAPI()
@@ -64,7 +64,20 @@ def get_tickets(db: Session = Depends(get_db), current_user: User = Depends(get_
     if current_user.role == "user":
         query = query.filter(Ticket.user_id == current_user.id)
 
-    return query.order_by(Ticket.id).all()
+    tickets = query.order_by(Ticket.id).all()
+
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "priority": t.priority,
+            "status": t.status,
+            "created_at": t.created_at,
+            "user_id": t.user_id,
+            "created_by": t.owner.name if t.owner else "Unknown",
+        }
+        for t in tickets
+    ]
 
 
 @app.get("/tickets/{ticket_id}")

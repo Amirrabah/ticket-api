@@ -113,7 +113,7 @@ loadBtn.addEventListener("click", async function() {
                 <span class="ticket-no">${id}</span>
                 <div>
                     <p class="ticket-title">${escapeHtml(ticket.title)}</p>
-                    <p class="ticket-meta">${priorityLabel} priority, ${status}, opened ${escapeHtml(date)}</p>
+                    <p class="ticket-meta">${priorityLabel} priority, ${status}, opened ${escapeHtml(date)} by ${escapeHtml(ticket.created_by)}</p>
                 </div>
                 <div class="ticket-actions">
                     <button class="btn-secondary" onclick="updateStatus(${id}, '${nextStatus}')">${buttonText}</button>

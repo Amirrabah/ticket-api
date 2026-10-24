@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from db import Base
 
@@ -22,3 +23,5 @@ class Ticket(Base):
     status = Column(String(20), nullable=False, default="open")
     user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, server_default=func.now())
+
+    owner = relationship("User")
