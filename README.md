@@ -58,6 +58,18 @@ uvicorn main:app --reload
 
 Open http://127.0.0.1:8000/docs
 
+## Tests
+
+12 automated tests with pytest, run against a temporary in-memory database so the real data is never touched.
+
+```bash
+pip install pytest httpx
+pytest test_main.py -v
+```
+
+They cover registration and login, the token requirement, the ticket flow, ownership rules (404 for other users' tickets), admin-only delete, and a regression test for the XSS fix.
+
+
 ## Security notes
 
 - Passwords hashed with bcrypt (salted, cost factor 12)
