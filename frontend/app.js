@@ -1,9 +1,19 @@
 const API_URL = "https://ticket-api-production-91ed.up.railway.app";
 
+// Escapes text so it is shown as text, never run as HTML.
+// Also escapes quotes, so it is safe inside attributes.
 function escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+// Only known values are allowed into CSS class names.
+function safeValue(value, allowed, fallback) {
+    return allowed.includes(value) ? value : fallback;
 }
 
 const loginBtn = document.getElementById("loginBtn");
@@ -57,6 +67,8 @@ registerBtn.addEventListener("click", async function() {
 
     if (response.ok) {
         regMessage.textContent = "Account created. Log in above.";
+    } else if (response.status === 422) {
+        regMessage.textContent = "Fill in every field. The password needs at least 8 characters.";
     } else {
         regMessage.textContent = data.detail;
     }
@@ -87,21 +99,25 @@ loadBtn.addEventListener("click", async function() {
     }
 
     for (const ticket of tickets) {
-        const nextStatus = ticket.status === "open" ? "closed" : "open";
-        const buttonText = ticket.status === "open" ? "Close" : "Reopen";
+        const id = Number(ticket.id);
+        const priority = safeValue(ticket.priority, ["low", "normal", "high"], "normal");
+        const status = safeValue(ticket.status, ["open", "closed"], "open");
+
+        const nextStatus = status === "open" ? "closed" : "open";
+        const buttonText = status === "open" ? "Close" : "Reopen";
         const date = new Date(ticket.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-        const priority = ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1);
+        const priorityLabel = priority.charAt(0).toUpperCase() + priority.slice(1);
 
         ticketList.innerHTML += `
-            <article class="ticket prio-${ticket.priority} status-${ticket.status}">
-                <span class="ticket-no">${ticket.id}</span>
+            <article class="ticket prio-${priority} status-${status}">
+                <span class="ticket-no">${id}</span>
                 <div>
                     <p class="ticket-title">${escapeHtml(ticket.title)}</p>
-                    <p class="ticket-meta">${priority} priority, ${ticket.status}, opened ${date}</p>
+                    <p class="ticket-meta">${priorityLabel} priority, ${status}, opened ${escapeHtml(date)} by ${escapeHtml(ticket.created_by)}</p>
                 </div>
                 <div class="ticket-actions">
-                    <button class="btn-secondary" onclick="updateStatus(${ticket.id}, '${nextStatus}')">${buttonText}</button>
-                    <button class="btn-delete" onclick="deleteTicket(${ticket.id})">Delete</button>
+                    <button class="btn-secondary" onclick="updateStatus(${id}, '${nextStatus}')">${buttonText}</button>
+                    <button class="btn-delete" onclick="deleteTicket(${id})">Delete</button>
                 </div>
             </article>
         `;

@@ -1,11 +1,14 @@
+from enum import Enum
+
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Ticket, User
 from auth import hash_password, verify_password, create_access_token
 from dependencies import get_current_user
-from fastapi.middleware.cors import CORSMiddleware
+
 
 
 app = FastAPI()
@@ -22,21 +25,36 @@ app.add_middleware(
 )
 
 
+# Only these values are accepted. Anything else gets a 422.
+class Priority(str, Enum):
+    low = "low"
+    normal = "normal"
+    high = "high"
+
+
+class Status(str, Enum):
+    open = "open"
+    closed = "closed"
+
+
 class TicketCreate(BaseModel):
-    title: str
-    priority: str
-    
+    title: str = Field(min_length=1, max_length=200)
+    priority: Priority
+
+
+class TicketUpdate(BaseModel):
+    status: Status
+
+
 class UserCreate(BaseModel):
-    name: str
-    email: str
-    password: str
+    name: str = Field(min_length=1, max_length=100)
+    email: str = Field(min_length=3, max_length=100)
+    password: str = Field(min_length=8, max_length=72)
+
 
 class UserLogin(BaseModel):
     email: str
     password: str
-    
-class TicketUpdate(BaseModel):
-    status: str
 
 
 @app.get("/tickets")
@@ -46,7 +64,20 @@ def get_tickets(db: Session = Depends(get_db), current_user: User = Depends(get_
     if current_user.role == "user":
         query = query.filter(Ticket.user_id == current_user.id)
 
-    return query.order_by(Ticket.id).all()
+    tickets = query.order_by(Ticket.id).all()
+
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "priority": t.priority,
+            "status": t.status,
+            "created_at": t.created_at,
+            "user_id": t.user_id,
+            "created_by": t.owner.name if t.owner else "Unknown",
+        }
+        for t in tickets
+    ]
 
 
 @app.get("/tickets/{ticket_id}")
@@ -60,6 +91,20 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: User
 
     return ticket
 
+
+@app.post("/tickets")
+def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    new_ticket = Ticket(
+        title=ticket.title,
+        priority=ticket.priority.value,
+        user_id=current_user.id
+    )
+    db.add(new_ticket)
+    db.commit()
+    db.refresh(new_ticket)
+    return new_ticket
+
+
 @app.patch("/tickets/{ticket_id}")
 def update_ticket(ticket_id: int, update: TicketUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
@@ -69,23 +114,10 @@ def update_ticket(ticket_id: int, update: TicketUpdate, db: Session = Depends(ge
     if current_user.role == "user" and ticket.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    ticket.status = update.status
+    ticket.status = update.status.value
     db.commit()
     db.refresh(ticket)
     return ticket
-
-
-@app.post("/tickets")
-def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    new_ticket = Ticket(
-        title=ticket.title,
-        priority=ticket.priority,
-        user_id=current_user.id
-    )
-    db.add(new_ticket)
-    db.commit()
-    db.refresh(new_ticket)
-    return new_ticket
 
 
 @app.delete("/tickets/{ticket_id}")
