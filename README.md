@@ -1,8 +1,12 @@
-# Ticket API
+# Service Desk — Ticket API
 
-REST API for ticket management, built with FastAPI and PostgreSQL. Supports user registration, JWT authentication and role-based access control.
+A full-stack IT ticket system. Users report problems and track them; admins see and manage every ticket. Built with FastAPI and PostgreSQL, with JWT authentication and role-based access control.
 
-**Live demo:** https://ticket-api-production-91ed.up.railway.app/docs
+**Live app:** https://rabah-servicedesk.netlify.app
+
+**Demo login:** demo@example.com / demo12345
+
+**API docs:** https://ticket-api-production-91ed.up.railway.app/docs
 
 ## Tech stack
 
@@ -12,15 +16,17 @@ REST API for ticket management, built with FastAPI and PostgreSQL. Supports user
 - **Alembic** — database migrations
 - **bcrypt** — password hashing
 - **python-jose** — JWT tokens
-- **Railway** — hosting
+- **HTML, CSS, JavaScript** — frontend
+- **Railway** (backend) and **Netlify** (frontend) — hosting
 
 ## Features
 
 - User registration with hashed passwords
 - JWT-based authentication
 - Role-based permissions (user / support / admin)
-- Tickets owned by their creator
+- Tickets owned by their creator, with the creator's name shown
 - Users see only their own tickets; support and admin see all
+- Tickets can be closed and reopened
 - Only admins can delete
 
 ## Endpoints
@@ -32,7 +38,7 @@ REST API for ticket management, built with FastAPI and PostgreSQL. Supports user
 | GET | `/tickets` | List tickets | Yes |
 | GET | `/tickets/{id}` | Get one ticket | Yes |
 | POST | `/tickets` | Create a ticket | Yes |
-| PATCH | `/tickets/{id}` | Close a ticket | Yes |
+| PATCH | `/tickets/{id}` | Update ticket status (open / closed) | Yes |
 | DELETE | `/tickets/{id}` | Delete a ticket | Admin |
 
 ## Running locally
@@ -57,5 +63,8 @@ Open http://127.0.0.1:8000/docs
 - Passwords hashed with bcrypt (salted, cost factor 12)
 - All queries parameterised — no SQL injection surface
 - Secrets held in environment variables, never committed
-- Login returns a generic error to prevent user enumeration
+- Login returns a generic error message
 - Requests for other users' tickets return 404 rather than 403, to avoid revealing which IDs exist
+- Priority and status are validated as enums on the server; the frontend escapes every rendered field
+- A stored XSS path through those fields was found during a self-review and fixed
+- CORS restricted to the frontend's domain
