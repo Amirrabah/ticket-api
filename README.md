@@ -1,7 +1,7 @@
 # Service Desk — Ticket API
+![Tests](https://github.com/Amirrabah/ticket-api/actions/workflows/test.yml/badge.svg)
 
 A full-stack IT ticket system. Users report problems and track them; admins see and manage every ticket. Built with FastAPI and PostgreSQL, with JWT authentication and role-based access control.
-
 **Live app:** https://rabah-servicedesk.netlify.app
 
 **Demo login:** demo@example.com / demo12345
