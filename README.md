@@ -58,6 +58,24 @@ uvicorn main:app --reload
 
 Open http://127.0.0.1:8000/docs
 
+
+
+## Running with Docker
+
+Runs the API and a PostgreSQL database together. Requires Docker Desktop.
+
+```bash
+cp .env.example .env          # then set SECRET_KEY
+docker compose up --build
+```
+
+Open http://127.0.0.1:8000/docs
+
+The API waits for the database healthcheck, runs the Alembic migrations, then starts. Database data is kept in a Docker volume between restarts.
+
+
+
+
 ## Tests
 
 12 automated tests with pytest, run against a temporary in-memory database so the real data is never touched.
