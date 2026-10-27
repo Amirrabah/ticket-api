@@ -1,7 +1,9 @@
 # Service Desk — Ticket API
+
 ![Tests](https://github.com/Amirrabah/ticket-api/actions/workflows/test.yml/badge.svg)
 
 A full-stack IT ticket system. Users report problems and track them; admins see and manage every ticket. Built with FastAPI and PostgreSQL, with JWT authentication and role-based access control.
+
 **Live app:** https://rabah-servicedesk.netlify.app
 
 **Demo login:** demo@example.com / demo12345
@@ -16,7 +18,10 @@ A full-stack IT ticket system. Users report problems and track them; admins see 
 - **Alembic** — database migrations
 - **bcrypt** — password hashing
 - **python-jose** — JWT tokens
+- **slowapi** — rate limiting
 - **HTML, CSS, JavaScript** — frontend
+- **Docker** and **Docker Compose** — containers
+- **GitHub Actions** — CI
 - **Railway** (backend) and **Netlify** (frontend) — hosting
 
 ## Features
@@ -34,7 +39,7 @@ A full-stack IT ticket system. Users report problems and track them; admins see 
 | Method | Path | Description | Auth |
 |---|---|---|---|
 | POST | `/register` | Create an account | No |
-| POST | `/login` | Get a JWT token | No |
+| POST | `/login` | Get a JWT token (max 5 attempts per minute) | No |
 | GET | `/tickets` | List tickets | Yes |
 | GET | `/tickets/{id}` | Get one ticket | Yes |
 | POST | `/tickets` | Create a ticket | Yes |
@@ -58,8 +63,6 @@ uvicorn main:app --reload
 
 Open http://127.0.0.1:8000/docs
 
-
-
 ## Running with Docker
 
 Runs the API and a PostgreSQL database together. Requires Docker Desktop.
@@ -71,29 +74,26 @@ docker compose up --build
 
 Open http://127.0.0.1:8000/docs
 
-The API waits for the database healthcheck, runs the Alembic migrations, then starts. Database data is kept in a Docker volume between restarts.
-
-
-
+The API waits for the database healthcheck, runs the Alembic migrations, then starts. Database data is kept in a Docker volume between restarts. Production on Railway is built from the same Dockerfile.
 
 ## Tests
 
-12 automated tests with pytest, run against a temporary in-memory database so the real data is never touched.
+13 automated tests with pytest, run against a temporary in-memory database so the real data is never touched. GitHub Actions runs them on every push.
 
 ```bash
 pip install pytest httpx
 pytest test_main.py -v
 ```
 
-They cover registration and login, the token requirement, the ticket flow, ownership rules (404 for other users' tickets), admin-only delete, and a regression test for the XSS fix.
-
+They cover registration and login, the token requirement, the ticket flow, ownership rules (404 for other users' tickets), admin-only delete, the login rate limit, and a regression test for the XSS fix.
 
 ## Security notes
 
 - Passwords hashed with bcrypt (salted, cost factor 12)
 - All queries parameterised — no SQL injection surface
-- Secrets held in environment variables, never committed
+- Secrets held in environment variables, never committed or baked into the Docker image
 - Login returns a generic error message
+- Login rate-limited to 5 attempts per minute per IP
 - Requests for other users' tickets return 404 rather than 403, to avoid revealing which IDs exist
 - Priority and status are validated as enums on the server; the frontend escapes every rendered field
 - A stored XSS path through those fields was found during a self-review and fixed
