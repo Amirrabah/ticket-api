@@ -45,11 +45,12 @@ loginBtn.addEventListener("click", async function() {
         localStorage.setItem("token", data.access_token);
         message.textContent = "";
         showLoggedIn();
+    } else if (response.status === 429) {
+        message.textContent = "Too many login attempts. Wait a minute and try again.";
     } else {
         message.textContent = data.detail;
     }
 });
-
 
 // Register
 registerBtn.addEventListener("click", async function() {

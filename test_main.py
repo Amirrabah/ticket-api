@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from main import app
+from main import app, limiter
 from db import Base, get_db
 from models import User
 
@@ -29,6 +29,9 @@ def override_get_db():
 # Swap the real database for the test database
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
+
+# Rate limiting is off for normal tests; one test below turns it on
+limiter.enabled = False
 
 
 @pytest.fixture(autouse=True)
@@ -174,3 +177,19 @@ def test_admin_can_delete():
     ticket_id = create_ticket(token).json()["id"]
     response = client.delete(f"/tickets/{ticket_id}", headers=auth(token))
     assert response.status_code == 200
+
+
+def test_login_rate_limited():
+    # 5 attempts per minute are allowed, the 6th is blocked
+    limiter.enabled = True
+    limiter.reset()
+    try:
+        register()
+        for _ in range(5):
+            response = client.post("/login", json={"email": "ameer@test.com", "password": "wrongpass1"})
+            assert response.status_code == 401
+
+        sixth = client.post("/login", json={"email": "ameer@test.com", "password": "wrongpass1"})
+        assert sixth.status_code == 429
+    finally:
+        limiter.enabled = False
